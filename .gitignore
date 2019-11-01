@@ -1,0 +1,10 @@
+/target/
+/out/
+/classes/
+.mvn
+
+.idea
+*.iws
+*.iml
+*.ipr
+.DS_Store
