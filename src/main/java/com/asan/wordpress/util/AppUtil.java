@@ -11,7 +11,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 /**
- * @Copyright: Shanghai Definesys Company.All rights reserved.
  * @Description:
  * @author: jianfeng.zheng
  * @since: 2019/10/26 1:43 PM

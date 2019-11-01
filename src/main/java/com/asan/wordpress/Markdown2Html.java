@@ -5,7 +5,6 @@ import com.asan.wordpress.util.AppUtil;
 import java.util.regex.Pattern;
 
 /**
- * @Copyright: Shanghai Definesys Company.All rights reserved.
  * @Description:
  * @author: jianfeng.zheng
  * @since: 2019/10/31 3:05 PM
