@@ -1,0 +1,48 @@
+<html>
+<head>
+    <meta name="referrer" content="unsafe-url"/>
+    <meta name="referrer" content="origin"/>
+    <meta name="referrer" content="no-referrer-when-downgrade"/>
+    <meta name="referrer" content="origin-when-cross-origin"/>
+    <meta name="referrer" content="no-referrer"/>
+    <meta charset="utf-8"/>
+</head>
+<body style="margin-top:20px;margin-left:20px;">
+
+<h2><a target="_blank" href="https://zhengjianfeng.cn/?p=394" style="color:blue">帮助文档</a></h2>
+
+<p>aid:</p><input type="text" name="aid" id="aid" value="74916"/></br>
+
+<p>csrfid:</p><input type="text" name="csrfid" id="csrfid" style="width:250px"
+                     value="027817004f35eb34f312464c4828ca62"/></br>
+
+<p>markdown内容:</p>
+<textarea rows="20" cols="100" id="md"></textarea></br></br>
+
+<button onclick="submitForm();">提交</button>
+
+<form id="bform" action="https://api.bilibili.com/x/article/creative/draft/addupdate" method="POST">
+
+    <input type="hidden" name="content" id="bcontent" value="xxxx"/>
+    <input type="hidden" name="aid" id="baid" value="74916"/>
+    <input type="hidden" name="csrf" id="bcsrfid" value="027817004f35eb34f312xxxxxxxx"/>
+</form>
+
+
+<script src="showdown.js"></script>
+<script type="text/javascript">
+    function submitForm() {
+        var aid = document.getElementById("aid").value;
+        var csrfid = document.getElementById("csrfid").value;
+        document.getElementById("baid").value = aid;
+        document.getElementById("bcsrfid").value = csrfid;
+        var content = document.getElementById("md").value;
+        var converter = new showdown.Converter();
+        var htmlcontent = converter.makeHtml(content);
+        document.getElementById("bcontent").value = htmlcontent;
+        document.getElementById("bform").submit();
+    }
+</script>
+
+</body>
+</html>
