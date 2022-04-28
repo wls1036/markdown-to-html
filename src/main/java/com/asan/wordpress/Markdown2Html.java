@@ -1,7 +1,13 @@
 package com.asan.wordpress;
 
+import com.asan.wordpress.convert.Mode;
 import com.asan.wordpress.util.AppUtil;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -12,6 +18,8 @@ import java.util.regex.Pattern;
  */
 public class Markdown2Html {
 
+    public static final String IMAGE_REX = "\\!\\[([^\\]]*)\\]\\(([^\\)]+)\\)";
+
 
     public static void main(String[] cmd) {
         String html = AppUtil.getSysClipboardText();
@@ -19,6 +27,28 @@ public class Markdown2Html {
             System.out.println("请将文章复制到剪贴板");
             return;
         }
+        Mode mode = Mode.HTML;
+        if (cmd != null && cmd.length > 0) {
+            mode = Mode.value(cmd[0]);
+            if (mode == Mode.UNKNOWN) {
+                System.out.println("mode:image/html");
+                return;
+            }
+        }
+        if (mode == Mode.HTML) {
+            convertHtml(html);
+        } else {
+            convertImage(html);
+        }
+
+    }
+
+    private static void convertImage(String text) {
+        text = handleLocalImage(text);
+        AppUtil.setSysClipboardText(text);
+    }
+
+    private static void convertHtml(String html) {
         //预处理
         html = pre(html);
 
@@ -82,7 +112,78 @@ public class Markdown2Html {
      */
     public static String pre(String content) {
         content = "\n" + content + "\n";
+        content = handleLocalImage(content);
         return content;
+    }
+
+    /**
+     * 处理本地图片，将本地图片上传到图床服务器
+     *
+     * @param content
+     * @return
+     */
+    public static String handleLocalImage(String content) {
+        Pattern imagePt = Pattern.compile(IMAGE_REX, Pattern.DOTALL);
+        Matcher matcher = imagePt.matcher(content);
+        Map<String, String> imageURLS = new HashMap<>();
+        while (matcher.find()) {
+            String url = matcher.group(2);
+            if (url.startsWith("http://") || url.startsWith("https://")) {
+                continue;
+            }
+            imageURLS.put(url, UUID.randomUUID().toString().replaceAll("-", ""));
+        }
+        for (String path : imageURLS.keySet()) {
+            String uuid = imageURLS.get(path);
+            List<String> command = new ArrayList<>();
+            command.add("scp");
+            command.add(path);
+            command.add("root@zhengjianfeng.cn:/u01/blog/data/resource/images/" + uuid + ".jpg");
+            System.out.println("正在上传=====>" + path);
+            boolean result = executeCommand(command);
+            System.out.println(result ? "上传成功" : "上传失败");
+            content = content.replaceAll(path, "http://zhengjianfeng.cn/images/" + uuid + ".jpg");
+        }
+        return content;
+    }
+
+    /**
+     * 执行多条命令
+     *
+     * @param commands
+     * @return
+     */
+    public static boolean executeCommand(List<String> commands) {
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.redirectErrorStream(true);
+        processBuilder.command(commands);
+        String content = null;
+        BufferedReader inputReader = null;
+        boolean result = true;
+        try {
+            Process process = processBuilder.start();
+            inputReader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()));
+            String line;
+            StringBuilder builder = new StringBuilder();
+            while ((line = inputReader.readLine()) != null) {
+                builder.append(line + "\n");
+            }
+            content = builder.toString();
+            System.out.println(content);
+        } catch (IOException e) {
+            result = false;
+            e.printStackTrace();
+        } finally {
+            if (inputReader != null) {
+                try {
+                    inputReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
     }
 
     /**
