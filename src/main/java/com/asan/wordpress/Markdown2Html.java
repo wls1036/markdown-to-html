@@ -138,7 +138,7 @@ public class Markdown2Html {
             List<String> command = new ArrayList<>();
             command.add("scp");
             command.add(path);
-            command.add("root@zhengjianfeng.cn:/u01/blog/data/resource/images/" + uuid + ".jpg");
+            command.add("root@zhengjianfeng.cn:/data/blog/data/wordpress/src/images/" + uuid + ".jpg");
             System.out.println("正在上传=====>" + path);
             boolean result = executeCommand(command);
             System.out.println(result ? "上传成功" : "上传失败");
